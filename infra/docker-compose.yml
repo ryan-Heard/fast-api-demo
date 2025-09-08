@@ -1,0 +1,42 @@
+# This docker-compose file sets up a local Apache Kafka environment,
+# including a Zookeeper service, which is required for Kafka to run.
+# Using docker-compose is the recommended approach for running multi-container applications like this.
+version: '3'
+
+services:
+  zookeeper:
+    # Use a well-maintained image from Confluent, a popular Kafka distribution company.
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    # Map the default Zookeeper port to the host machine.
+    ports:
+      - "2181:2181"
+    environment:
+      # Set up a single Zookeeper node.
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    # Use a Confluent Kafka image that works with the Zookeeper version.
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    # Map the Kafka broker port. Note the two-way mapping for host-internal communication.
+    ports:
+      - "9092:9092"
+    environment:
+      # Broker ID for this Kafka instance.
+      KAFKA_BROKER_ID: 1
+      # The listener advertised to clients. This must be accessible from your host machine.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      # The list of listeners that this broker listens on.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      # The network interface to bind to.
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Point to the Zookeeper instance defined in this compose file.
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # Set up automatic topic creation.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Set the log directories.
+      KAFKA_LOG_DIRS: /tmp/logs
