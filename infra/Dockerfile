@@ -31,4 +31,6 @@ EXPOSE 5432
 # found in this directory when the container is first created.
 # This is a great way to automatically initialize your database schema and data.
 # For example, you can add a 'schema.sql' or 'init-data.sql' file here.
-COPY ./init.sql /docker-entrypoint-initdb.d/
+COPY init.sql /docker-entrypoint-initdb.d/
+# COPY ./schema.sql /docker-entrypoint-initdb.d/
+# COPY ./init-data.sql /docker-entrypoint-initdb.d/
